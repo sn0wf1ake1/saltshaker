@@ -1,25 +1,50 @@
-# START Split a character into a 4 block array
-$test = 'z'
-$test = 'æ'
-$test = '雨'
+Clear-Host
 
-$x = @(0,0,0,0)
-$y = [System.Text.Encoding]::Default.GetBytes($test).Length - 1
-for($i = 0; $i -le $y; $i++) {
-    $x[$i + 3 - $y] = [System.Text.Encoding]::Default.GetBytes($test)[$i]
-}
-# END Split a character into a 4 block array
+$password = "passwod  2"
+$password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
+#$UserName = (Get-Random -Minimum 10 -Maximum 99).ToString() + $password + "æøå雨 test aaa nkjfk l k nkf kbrkh b4oooioj"
+#$UserName = Get-Random
+#"$UserName`n".Substring(0,4)
+$block = "æøå雨"
 
-#START Encode the character to a 4 block binary entity
-[string]$b = '00000000000000000000000000000000'
-for($i = 0; $i -lt 4; $i++) {
-    [string]$a = [convert]::ToString([int32]$x[$i],2)
-    for($y = 0; $y -lt 8 - $a.Length; $y++) {
-        $a = '0' + $a
+'Block encoded: ' + $block
+[string]$blocks_encoded = ''
+
+<# Encode start #>
+for($j = 0; $j -le 3; $j++) {
+    $EncodedText = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($([string]$block.Substring($j,1))))
+#    "Encoded text: $EncodedText" # Debug
+
+    [string]$utf2 = ''
+
+    for($i = 0; $i -le 3; $i++) {
+        $x = [byte][char]($EncodedText.Substring($i,1))
+        $y = $x -bxor 19
+        $utf2 += [char]$y
     }
 
-    $b += $a
+#    'Encoded: ' + $utf2 # Debug
+
+    $blocks_encoded += $utf2
+}
+<# Encode end #>
+
+<# Decode start #>
+$blocks_decoded = ''
+
+for($j = 0; $j -le 12; $j += 4) {
+    [string]$utf3 = ''
+
+    for($i = 0; $i -le 3; $i++) {
+        $x = [byte][char]($blocks_encoded.Substring($j,4).Substring($i,1))
+        $y = $x -bxor 19
+        $utf3 += [char]$y
+    }
+
+#    'Block: ' + [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf3)) # Debug
+
+    $blocks_decoded += [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf3))
 }
 
-$b.Substring($b.Length - 32)
-#END Encode the character to a 4 block binary entity
+'Block decoded: ' + $blocks_decoded
+<# Decode end #>
