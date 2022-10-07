@@ -8,43 +8,44 @@ $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($p
 $block = "æøå雨"
 
 'Block encoded: ' + $block
+
+<# UTF-8 encode start #>
 [string]$blocks_encoded = ''
 
-<# Encode start #>
 for($j = 0; $j -le 3; $j++) {
     $EncodedText = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($([string]$block.Substring($j,1))))
 #    "Encoded text: $EncodedText" # Debug
 
-    [string]$utf2 = ''
+    [string]$utf = ''
 
     for($i = 0; $i -le 3; $i++) {
         $x = [byte][char]($EncodedText.Substring($i,1))
         $y = $x -bxor 19
-        $utf2 += [char]$y
+        $utf += [char]$y
     }
 
-#    'Encoded: ' + $utf2 # Debug
+#    'Encoded: ' + $utf # Debug
 
-    $blocks_encoded += $utf2
+    $blocks_encoded += $utf
 }
-<# Encode end #>
+<# UTF-8 encode end #>
 
-<# Decode start #>
-$blocks_decoded = ''
+<# UTF-8 decode start #>
+[string]$blocks_decoded = ''
 
 for($j = 0; $j -le 12; $j += 4) {
-    [string]$utf3 = ''
+    [string]$utf = ''
 
     for($i = 0; $i -le 3; $i++) {
         $x = [byte][char]($blocks_encoded.Substring($j,4).Substring($i,1))
         $y = $x -bxor 19
-        $utf3 += [char]$y
+        $utf += [char]$y
     }
 
-#    'Block: ' + [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf3)) # Debug
+#    'Block: ' + [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf)) # Debug
 
-    $blocks_decoded += [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf3))
+    $blocks_decoded += [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
 }
 
 'Block decoded: ' + $blocks_decoded
-<# Decode end #>
+<# UTF-8 decode end #>
