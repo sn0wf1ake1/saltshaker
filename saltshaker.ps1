@@ -1,34 +1,47 @@
 Clear-Host
 
+<# Password start #>
 $password = "passwod  2"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
-#$UserName = (Get-Random -Minimum 10 -Maximum 99).ToString() + $password + "æøå雨 test aaa nkjfk l k nkf kbrkh b4oooioj"
-#$UserName = Get-Random
-#"$UserName`n".Substring(0,4)
+$password_binary = @()
+
+for($i = 0; $i -le $password.Length - 1; $i++) {
+    $password_binary += [System.Convert]::ToString([byte][char]$password.Substring($i,1),2).PadLeft(8,'0')
+}
+
+$password_binary -join ' '
+<# Password end #>
+
 $block = "æøå雨"
 
 'Block encoded: ' + $block
 
-<# UTF-8 encode start #>
+<# UTF-8 encode into 16 byte blocks start #>
 [string]$blocks_encoded = ''
 
 for($j = 0; $j -le 3; $j++) {
-    $EncodedText = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($([string]$block.Substring($j,1))))
-#    "Encoded text: $EncodedText" # Debug
-
+    $base64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($([string]$block.Substring($j,1))))
     [string]$utf = ''
 
     for($i = 0; $i -le 3; $i++) {
-        $x = [byte][char]($EncodedText.Substring($i,1))
-        $y = $x -bxor 19
-        $utf += [char]$y
+        $utf += [char]($base64.Substring($i,1))
     }
-
-#    'Encoded: ' + $utf # Debug
 
     $blocks_encoded += $utf
 }
-<# UTF-8 encode end #>
+
+'UTF-8 encoded: ' + $blocks_encoded
+<# UTF-8 encode into 16 byte blocks end #>
+
+<# Encryption start #>
+$utf_binary = @()
+
+foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
+    $utf_binary += [System.Convert]::ToString($block,2).PadLeft(8,'0')
+}
+
+$utf_binary -join ' '
+<# Encryption end #>
 
 <# UTF-8 decode start #>
 [string]$blocks_decoded = ''
@@ -37,12 +50,8 @@ for($j = 0; $j -le 12; $j += 4) {
     [string]$utf = ''
 
     for($i = 0; $i -le 3; $i++) {
-        $x = [byte][char]($blocks_encoded.Substring($j,4).Substring($i,1))
-        $y = $x -bxor 19
-        $utf += [char]$y
+        $utf += [char]($blocks_encoded.Substring($j,4).Substring($i,1))
     }
-
-#    'Block: ' + [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf)) # Debug
 
     $blocks_decoded += [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
 }
