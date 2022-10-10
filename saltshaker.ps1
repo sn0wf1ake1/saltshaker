@@ -1,13 +1,13 @@
 Clear-Host
 
 <# Password start #>
-$password = "passwod  2"
+$password = "password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
 $password_binary = @()
 $password_salted = @()
 $password_salted_temp = ''
 
-for($i = 0; $i -le $password.Length - 1; $i++) {
+for($i = 0; $i -lt $password.Length; $i++) {
     $password_binary += [System.Convert]::ToString([byte][char]$password.Substring($i,1),2).PadLeft(8,'0')
 }
 
@@ -56,7 +56,23 @@ foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
 
 'UTF-8 binary:    ' + $utf_binary -join ' '
 
-#[char][Convert]::ToInt32($utf_binary[0],2)
+$utf_binary_string = $utf_binary -join ''
+$password_salted_string = $password_salted -join ''
+
+for($i = 0; $i -lt ($password_salted.Count - ($password_salted.Count % 16)) / 16; $i++) { # Amount of cycles based on $password_salted length
+    for($j = 0; $j -lt 128; $j++) {
+        $utf_binary_string += $utf_binary_string.Substring($i * 128,128).Substring($j,1) -bxor $password_salted_string.Substring($i * 128,128).Substring($j,1)
+    }
+}
+
+$block_encrypted = @()
+$utf_binary_string = $utf_binary_string.Substring($utf_binary_string.Length - 128,128)
+
+for($i = 0; $i -lt 128; $i += 8) {
+    $block_encrypted += $utf_binary_string.Substring($i,8)
+}
+
+'Encrypted:       ' + $block_encrypted -join ' '
 <# Encryption end #>
 
 <# UTF-8 decode start #>
