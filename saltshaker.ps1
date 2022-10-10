@@ -22,7 +22,7 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
     $password_salted += [System.Convert]::ToString($password_salted_temp.Substring($i,3) % 255,2).PadLeft(8,'0')
 }
 
-'Password salted: ' + ($password_salted -join ' ').Substring(0,134) + ' ...' # Salt is way too long to display
+'Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...' # Salt is way too long to display
 <# Salt password end #>
 <# Password end #>
 
