@@ -68,6 +68,7 @@ for($i = 0; $i -lt ($password_salted.Count - ($password_salted.Count % 16)) / 16
 }
 
 $block_encrypted = @()
+$block_encrypted_text = ''
 $utf_binary_string = $utf_binary_string.Substring($utf_binary_string.Length - 128,128)
 
 for($i = 0; $i -lt 128; $i += 8) {
@@ -75,6 +76,12 @@ for($i = 0; $i -lt 128; $i += 8) {
 }
 
 'Encrypted:       ' + $block_encrypted -join ' '
+
+for($i = 0; $i -lt 16; $i++) {
+    $block_encrypted_text += [char][Convert]::ToInt32($block_encrypted[$i],2)
+}
+
+'Encrypted text:  ' + $block_encrypted_text
 <# Encryption end #>
 
 <# UTF-8 decode start #>
