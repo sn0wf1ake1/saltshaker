@@ -1,7 +1,7 @@
 Clear-Host
 
 <# Password start #>
-$password = "password"
+$password = "Password12"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
 $password_binary = @()
 $password_salted = @()
@@ -14,9 +14,15 @@ for($i = 0; $i -lt $password.Length; $i++) {
 'Password binary: ' + $password_binary -join ' '
 
 <# Salt password start #>
+$x = ([long][char]$password.Substring(0,1) / [math]::E).ToString().Substring(3)
+$y = ''
+
 for($i = 0; $i -lt $password.Length; $i++) {
-    $password_salted_temp += (([long][char]$password[$i] + $i) / [math]::E).ToString().Substring(3)
+    $x += ([long][char]$password.Substring($i,1) / [math]::E).ToString() + $y
+    $y += ($x.Substring($x.Length - 6,6) / [math]::E).ToString()
 }
+
+$password_salted_temp = $x.Replace(',','').Replace('.','')
 
 for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length % 3) - 1; $i += 3) {
     $password_salted += [System.Convert]::ToString($password_salted_temp.Substring($i,3) % 255,2).PadLeft(8,'0')
@@ -35,11 +41,11 @@ $block = "æøå雨"
 <# UTF-8 encode into 16 byte blocks start #>
 [string]$blocks_encoded = ''
 
-for($j = 0; $j -le 3; $j++) {
+for($j = 0; $j -lt 4; $j++) {
     $base64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($([string]$block.Substring($j,1))))
     [string]$utf = ''
 
-    for($i = 0; $i -le 3; $i++) {
+    for($i = 0; $i -lt 4; $i++) {
         $utf += [char]($base64.Substring($i,1))
     }
 
@@ -61,6 +67,8 @@ foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
 $utf_binary_string = $utf_binary -join ''
 $password_salted_string = $password_salted -join ''
 $password_rotations = ($password_salted.Count - ($password_salted.Count % 16)) / 16
+
+'Rotations:       ' + $password_rotations
 
 for($i = 0; $i -lt $password_rotations; $i++) {
     for($j = 0; $j -lt 128; $j++) {
@@ -114,7 +122,7 @@ for($j = 0; $j -le 12; $j += 4) {
         $utf += [char]($blocks_encoded.Substring($j,4).Substring($i,1))
     }
 
-    $blocks_decoded += [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
+    $blocks_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
 }
 
 'Block decoded:   ' + $blocks_decoded
