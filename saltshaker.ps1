@@ -49,7 +49,7 @@ for($j = 0; $j -le 3; $j++) {
 'UTF-8 encoded:   ' + $blocks_encoded
 <# UTF-8 encode into 16 byte blocks end #>
 
-<# Encryption start #>
+<# Encrypt start #>
 $utf_binary = @()
 
 foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
@@ -60,8 +60,9 @@ foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
 
 $utf_binary_string = $utf_binary -join ''
 $password_salted_string = $password_salted -join ''
+$password_rotations = ($password_salted.Count - ($password_salted.Count % 16)) / 16
 
-for($i = 0; $i -lt ($password_salted.Count - ($password_salted.Count % 16)) / 16; $i++) { # Amount of cycles based on $password_salted length
+for($i = 0; $i -lt $password_rotations; $i++) {
     for($j = 0; $j -lt 128; $j++) {
         $utf_binary_string += $utf_binary_string.Substring($i * 128,128).Substring($j,1) -bxor $password_salted_string.Substring($i * 128,128).Substring($j,1)
     }
@@ -82,7 +83,24 @@ for($i = 0; $i -lt 16; $i++) {
 }
 
 'Encrypted text:  ' + $block_encrypted_text
-<# Encryption end #>
+<# Encrypt end #>
+
+<# Decrypt start #>
+for($i = 0; $i -lt $password_rotations; $i++) {
+    for($j = 0; $j -lt 128; $j++) {
+        $utf_binary_string += $utf_binary_string.Substring($i * 128,128).Substring($j,1) -bxor $password_salted_string.Substring($i * 128,128).Substring($j,1)
+    }
+}
+
+$blocks_encoded = ''
+$block_decrypted = $utf_binary_string.Substring($utf_binary_string.Length - 128,128) -split '(\w{8})' | Where-Object {$_}
+
+'Decrypted:       ' + $block_decrypted -join ' '
+
+for($i = 0; $i -lt 16; $i++) {
+    $blocks_encoded +=  [char][convert]::ToInt32($block_decrypted[$i],2)
+}
+<# Decrypt end #>
 
 <# UTF-8 decode start #>
 [string]$blocks_decoded = ''
