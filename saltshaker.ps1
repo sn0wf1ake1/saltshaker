@@ -29,7 +29,7 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
 <# 4 character block to be encrypted start #>
 $block = "æøå雨"
 
-'Block encoded:   ' + $block
+'Block text:      ' + $block
 <# 4 character block to be encrypted end #>
 
 <# UTF-8 encode into 16 byte blocks start #>
