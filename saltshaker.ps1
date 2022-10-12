@@ -3,17 +3,9 @@ Clear-Host
 <# Password start #>
 $password = "Password12"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
-$password_binary = @()
 $password_salted = @()
 $password_salted_temp = ''
 
-for($i = 0; $i -lt $password.Length; $i++) {
-    $password_binary += [System.Convert]::ToString([byte][char]$password.Substring($i,1),2).PadLeft(8,'0')
-}
-
-'Password binary: ' + $password_binary -join ' '
-
-<# Salt password start #>
 $x = ([long][char]$password.Substring(0,1) / [math]::E).ToString().Substring(3)
 $y = ''
 
@@ -29,7 +21,6 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
 }
 
 'Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...' # Salt is way too long to display
-<# Salt password end #>
 <# Password end #>
 
 <# 4 character block to be encrypted start #>
