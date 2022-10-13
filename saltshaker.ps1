@@ -57,7 +57,7 @@ foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
 
 $utf_binary_string = $utf_binary -join ''
 $password_salted_string = $password_salted -join ''
-$password_rotations = [int](($password_salted.Count - ($password_salted.Count % 16)) / 128) + 1 # Do not try to understand this line of code
+$password_rotations = [int](($password_salted.Count - ($password_salted.Count % 16)) / 128) # Do not try to understand this line of code
 
 'Rotations:       ' + $password_rotations
 
