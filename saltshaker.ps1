@@ -24,7 +24,7 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
 <# Password end #>
 
 <# 4 character block to be encrypted start #>
-$block = "æøå雨"
+$block = "xøå雨"
 
 'Block text:      ' + $block
 <# 4 character block to be encrypted end #>
