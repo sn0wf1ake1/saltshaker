@@ -1,7 +1,7 @@
 Clear-Host
 
 <# Password start #>
-$password = "Password12"
+$password = "Password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
 $password_salted = @()
 $password_salted_temp = ''
@@ -57,7 +57,7 @@ foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
 
 $utf_binary_string = $utf_binary -join ''
 $password_salted_string = $password_salted -join ''
-$password_rotations = ($password_salted.Count - ($password_salted.Count % 16)) / 16
+$password_rotations = [int](($password_salted.Count - ($password_salted.Count % 16)) / 128) + 1
 
 'Rotations:       ' + $password_rotations
 
