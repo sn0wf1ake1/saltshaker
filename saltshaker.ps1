@@ -100,7 +100,7 @@ for($i = 0; $i -lt 16; $i++) {
     $blocks_encoded +=  [char][convert]::ToInt32($block_decrypted[$i],2)
 }
 
-'UTF-8 encoded:   ' + $blocks_encoded
+'UTF-8 decoded:   ' + $blocks_encoded
 <# Decrypt end #>
 
 <# UTF-8 decode start #>
