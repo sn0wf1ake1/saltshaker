@@ -5,6 +5,7 @@ $password = "Password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
 $password_salted = @()
 $password_salted_temp = ''
+$debug = 0
 
 $x = ([long][char]$password.Substring(0,1) / [math]::E).ToString().Substring(3)
 $y = ''
@@ -20,10 +21,16 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
     $password_salted += [System.Convert]::ToString($password_salted_temp.Substring($i,3) % 255,2).PadLeft(8,'0')
 }
 
-'Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...' # Salt is way too long to display
+if($debug -eq 1){'Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...'} # Salt is way too long to display
 <# Password end #>
 
-function saltshaker($block) {
+function saltshaker() {
+     param (
+        [Parameter(Mandatory = $true)] [string]$block,
+        [Parameter(Mandatory = $true)] [int]$block_count,
+        [Parameter(Mandatory = $true)] [int]$block_total
+    )
+ 
     <# UTF-8 encode into 16 byte blocks start #>
     [string]$blocks_encoded = ''
 
@@ -114,8 +121,9 @@ function saltshaker($block) {
         $blocks_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
     }
 
-    'Block decoded:   ' + $blocks_decoded + "`n"
+    'Block decoded:   ' + $blocks_decoded
     <# UTF-8 decode end #>
+    'Block count:     ' + [string]$block_count + '/' + [string]$block_total + "`n"
 }
 
 <# String divided into 4 character blocks to be encrypted start #>
@@ -130,6 +138,6 @@ $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # 
 
 for($i = 0; $i -lt $data.Length / 4; $i++) {
     'Block text:      ' + $data.Substring($i * 4,4)
-    saltshaker($data.Substring($i * 4,4))
+    saltshaker $data.Substring($i * 4,4) $i (($data.Length / 4) - 1)
 }
 <# String divided into 4 character blocks to be encrypted start #>
