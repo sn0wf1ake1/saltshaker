@@ -128,7 +128,7 @@ for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
 
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to end
 
-for($i = 0; $i -lt ($data.Length - $data.Length % 4) / 4; $i++) {
+for($i = 0; $i -lt $data.Length / 4; $i++) {
     'Block text:      ' + $data.Substring($i * 4,4)
     saltshaker($data.Substring($i * 4,4))
 }
