@@ -131,7 +131,7 @@ if($data.Length % 4 -eq 0) {
         $data += [char](Get-Random -Minimum 65 -Maximum 122) # The final 4 characters that does not contain numbers
     }
     } else {
-    for($i = 0; $i -lt 4 - ($data.Length % 4); $i++) {
+    for($i = 0; $i -lt 3; $i++) {
         $data_padding += [char](Get-Random -Minimum 65 -Maximum 122)
     }
 
@@ -144,6 +144,7 @@ if($data.Length % 4 -eq 0) {
 <# First byte shows if the second to last byte doesn't fit the 4 byte mask end #>
 
 $data
+$data.Length
 break
 
 for($i = 0; $i -lt ($data.Length - $data.Length % 4) / 4; $i++) {
