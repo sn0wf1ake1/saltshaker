@@ -122,8 +122,8 @@ function saltshaker() {
     }
 
     'Block decoded:   ' + $blocks_decoded
-    <# UTF-8 decode end #>
     'Block count:     ' + [string]$block_count + '/' + [string]$block_total + "`n"
+    <# UTF-8 decode end #>
 }
 
 <# String divided into 4 character blocks to be encrypted start #>
