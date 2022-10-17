@@ -143,10 +143,6 @@ if($data.Length % 4 -eq 0) {
 }
 <# First byte shows if the second to last byte doesn't fit the 4 byte mask end #>
 
-$data
-$data.Length
-break
-
 for($i = 0; $i -lt ($data.Length - $data.Length % 4) / 4; $i++) {
     'Block text:      ' + $data.Substring($i * 4,4)
     saltshaker($data.Substring($i * 4,4))
