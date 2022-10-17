@@ -118,20 +118,18 @@ function saltshaker($block) {
     <# UTF-8 decode end #>
 }
 
-<# 4 character block to be encrypted start #>
-$data = "æøå雨wxz"
+<# String divided into 4 character blocks to be encrypted start #>
+$data = "æøå雨wxzQ"
 $data_padding = ''
 
-<# First byte counts how many padded characters has been added to end start #>
 for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
     $data_padding += [char](Get-Random -Minimum 32 -Maximum 126)
 }
 
-$data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding
-<# First byte counts how many padded characters has been added to end end #>
+$data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to end
 
 for($i = 0; $i -lt ($data.Length - $data.Length % 4) / 4; $i++) {
     'Block text:      ' + $data.Substring($i * 4,4)
     saltshaker($data.Substring($i * 4,4))
 }
-<# 4 character block to be encrypted end #>
+<# String divided into 4 character blocks to be encrypted start #>
