@@ -74,7 +74,7 @@ function saltshaker($block) {
 
     for($i = 0; $i -lt 16; $i++) {
         $j = [Convert]::ToInt32($block_encrypted[$i],2)
-        if($j -ne 158) { # This character for some reason cannot be converted
+        if($j -ne 158) { # x9E cannot be converted for some reason
             $block_encrypted_text += [char]$j
         }
     }
@@ -120,6 +120,28 @@ function saltshaker($block) {
 
 <# 4 character block to be encrypted start #>
 $data = "æøå雨wxyz"
+$data_padding = ''
+
+<# First byte shows if the second to last byte doesn't fit the 4 byte mask start #>
+if($data.Length % 4 -eq 0) {
+    for($i = 0; $i -lt 4; $i++) {
+       $data = [char](Get-Random -Minimum 65 -Maximum 122) + $data # The first 4 characters that does not contain numbers
+    }
+    for($i = 0; $i -lt 4; $i++) {
+        $data += [char](Get-Random -Minimum 65 -Maximum 122) # The final 4 characters that does not contain numbers
+    }
+    } else {
+    for($i = 0; $i -lt 4 - ($data.Length % 4); $i++) {
+        $data_padding += [char](Get-Random -Minimum 0 -Maximum 255)
+    }
+
+    $data = $data_padding + (4 - ($data.Length % 4)) + $data
+
+    for($i = 0; $i -lt $data.Length % 4; $i++) {
+        $data += [char](Get-Random -Minimum 0 -Maximum 255)
+    }
+}
+<# First byte shows if the second to last byte doesn't fit the 4 byte mask end #>
 
 for($i = 0; $i -lt ($data.Length - $data.Length % 4) / 4; $i++) {
     'Block text:      ' + $data.Substring($i * 4,4)
