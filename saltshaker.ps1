@@ -119,29 +119,16 @@ function saltshaker($block) {
 }
 
 <# 4 character block to be encrypted start #>
-$data = "æøå雨wxyzHg"
+$data = "æøå雨wxyz"
 $data_padding = ''
 
-<# First byte shows if the second to last byte doesn't fit the 4 byte mask start #>
-if($data.Length % 4 -eq 0) {
-    for($i = 0; $i -lt 4; $i++) {
-       $data = [char](Get-Random -Minimum 58 -Maximum 126) + $data # The first 4 characters that does not contain numbers
-    }
-    for($i = 0; $i -lt 4; $i++) {
-        $data += [char](Get-Random -Minimum 58 -Maximum 126) # The final 4 characters that does not contain numbers
-    }
-    } else {
-    for($i = 0; $i -lt 3; $i++) {
-        $data_padding += [char](Get-Random -Minimum 58 -Maximum 126)
-    }
-
-    $data = $data_padding + (4 - ($data.Length % 4)) + $data
-
-    for($i = 0; $i -lt $data.Length % 4; $i++) {
-        $data += [char](Get-Random -Minimum 58 -Maximum 126)
-    }
+<# First byte counts how many padded characters has been added to end start #>
+for($i = 0; $i -lt 4 - ($data.Length + 1) % 4; $i++) {
+    $data_padding += [char](Get-Random -Minimum 58 -Maximum 126)
 }
-<# First byte shows if the second to last byte doesn't fit the 4 byte mask end #>
+
+$data = (4 - ($data.Length + 1) % 4).ToString() + $data + $data_padding
+<# First byte counts how many padded characters has been added to end end #>
 
 for($i = 0; $i -lt ($data.Length - $data.Length % 4) / 4; $i++) {
     'Block text:      ' + $data.Substring($i * 4,4)
