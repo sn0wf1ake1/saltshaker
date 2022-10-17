@@ -80,7 +80,6 @@ function saltshaker($block) {
     }
 
     'Encrypted text:  ' + $block_encrypted_text
-
     <# Encrypt end #>
 
     <# Decrypt start #>
