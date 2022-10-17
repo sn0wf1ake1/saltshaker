@@ -119,7 +119,7 @@ function saltshaker($block) {
 }
 
 <# 4 character block to be encrypted start #>
-$data = "æøå雨wxyz"
+$data = "æøå雨wxyzH"
 $data_padding = ''
 
 <# First byte shows if the second to last byte doesn't fit the 4 byte mask start #>
@@ -132,16 +132,19 @@ if($data.Length % 4 -eq 0) {
     }
     } else {
     for($i = 0; $i -lt 4 - ($data.Length % 4); $i++) {
-        $data_padding += [char](Get-Random -Minimum 0 -Maximum 255)
+        $data_padding += [char](Get-Random -Minimum 65 -Maximum 122)
     }
 
     $data = $data_padding + (4 - ($data.Length % 4)) + $data
 
     for($i = 0; $i -lt $data.Length % 4; $i++) {
-        $data += [char](Get-Random -Minimum 0 -Maximum 255)
+        $data += [char](Get-Random -Minimum 65 -Maximum 122)
     }
 }
 <# First byte shows if the second to last byte doesn't fit the 4 byte mask end #>
+
+$data
+break
 
 for($i = 0; $i -lt ($data.Length - $data.Length % 4) / 4; $i++) {
     'Block text:      ' + $data.Substring($i * 4,4)
