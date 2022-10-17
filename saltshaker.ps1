@@ -124,7 +124,7 @@ $data_padding = ''
 
 <# First byte counts how many padded characters has been added to end start #>
 for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
-    $data_padding += [char](Get-Random -Minimum 58 -Maximum 126)
+    $data_padding += [char](Get-Random -Minimum 32 -Maximum 126)
 }
 
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding
