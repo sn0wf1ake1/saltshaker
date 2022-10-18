@@ -86,7 +86,7 @@ function saltshaker() {
         }
     }
 
-    'Encrypted text:  ' + $block_encrypted_text
+#    'Encrypted text:  ' + $block_encrypted_text
     <# Encrypt end #>
 
     <# Decrypt start #>
@@ -121,23 +121,32 @@ function saltshaker() {
         $blocks_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
     }
 
-    'Block decoded:   ' + $blocks_decoded
-    'Block count:     ' + [string]$block_count + '/' + [string]$block_total + "`n"
+    if($debugging -eq 1){'Block count:     ' + [string]$block_count + '/' + [string]$block_total + "`n"}
+    if($debugging -eq 1){'Block decoded:   ' + $blocks_decoded}
+    
+    return $blocks_decoded
     <# UTF-8 decode end #>
 }
 
 <# String divided into 4 character blocks to be encrypted start #>
 $data = "æøå雨wxzQ"
 $data_padding = ''
+$blocks_decoded_array = @()
+$blocks_decoded_string = ''
 
 for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
     $data_padding += [char](Get-Random -Minimum 32 -Maximum 126)
 }
 
-$data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to end
+$data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
 
 for($i = 0; $i -lt $data.Length / 4; $i++) {
-    'Block text:      ' + $data.Substring($i * 4,4)
-    saltshaker $data.Substring($i * 4,4) $i (($data.Length / 4) - 1) 0
+    $blocks_decoded_array += saltshaker $data.Substring($i * 4,4) $i (($data.Length / 4) - 1) 0
 }
+
+for($i = 0; $i -lt $blocks_decoded_array.Count; $i++) {
+    $blocks_decoded_string += $blocks_decoded_array[$i]
+}
+
+'Decrypted: ' + $blocks_decoded_string.Substring(1, $blocks_decoded_string.Length - ([int]$blocks_decoded_string.Substring(0,1) + 1))
 <# String divided into 4 character blocks to be encrypted start #>
