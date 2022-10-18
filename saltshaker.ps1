@@ -84,7 +84,7 @@ function saltshaker() {
         }
     }
 
-#    'Encrypted text:  ' + $block_encrypted_text
+    if($debugging -eq 1){'Encrypted text:  ' + $block_encrypted_text}
     <# Encrypt end #>
 
     <# Decrypt start #>
@@ -119,7 +119,7 @@ function saltshaker() {
         $blocks_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
     }
 
-    return $blocks_decoded
+    return @($blocks_decoded,$block_encrypted_text)
     <# UTF-8 decode end #>
 }
 
@@ -128,6 +128,7 @@ $data = "æøå雨wxzQ"
 $data_padding = ''
 $blocks_decoded_array = @()
 $blocks_decoded_string = ''
+$blocks_encrypted_string = ''
 
 for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
     $data_padding += [char](Get-Random -Minimum 32 -Maximum 126)
@@ -139,9 +140,13 @@ for($i = 0; $i -lt $data.Length / 4; $i++) {
     $blocks_decoded_array += saltshaker $data.Substring($i * 4,4) 0
 }
 
-for($i = 0; $i -lt $blocks_decoded_array.Count; $i++) {
+for($i = 0; $i -lt $blocks_decoded_array.Count; $i += 2) {
     $blocks_decoded_string += $blocks_decoded_array[$i]
+    $blocks_encrypted_string += $blocks_decoded_array[$i + 1]
 }
 
-'Decrypted: ' + $blocks_decoded_string.Substring(1, $blocks_decoded_string.Length - ([int]$blocks_decoded_string.Substring(0,1) + 1))
+'Encrypted: '
+$blocks_encrypted_string
+'Decrypted: '
+$blocks_decoded_string.Substring(1, $blocks_decoded_string.Length - ([int]$blocks_decoded_string.Substring(0,1) + 1))
 <# String divided into 4 character blocks to be encrypted start #>
