@@ -141,12 +141,12 @@ for($i = 0; $i -lt $data.Length / 4; $i++) {
 }
 
 for($i = 0; $i -lt $blocks_decoded_array.Count; $i += 2) {
-    $blocks_decoded_string += $blocks_decoded_array[$i]
     $blocks_encrypted_string += $blocks_decoded_array[$i + 1]
+    $blocks_decoded_string += $blocks_decoded_array[$i]
 }
 
 'Encrypted: '
 $blocks_encrypted_string
 'Decrypted: '
 $blocks_decoded_string.Substring(1, $blocks_decoded_string.Length - ([int]$blocks_decoded_string.Substring(0,1) + 1))
-<# String divided into 4 character blocks to be encrypted start #>
+<# String divided into 4 character blocks to be encrypted end #>
