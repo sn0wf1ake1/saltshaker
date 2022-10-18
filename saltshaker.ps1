@@ -24,8 +24,6 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
 function saltshaker() {
      param (
         [Parameter(Mandatory = $true)] [string]$block,
-        [Parameter(Mandatory = $true)] [int]$block_count,
-        [Parameter(Mandatory = $true)] [int]$block_total,
         [Parameter(Mandatory = $true)] [byte]$debugging
     )
 
@@ -121,9 +119,6 @@ function saltshaker() {
         $blocks_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
     }
 
-    if($debugging -eq 1){'Block count:     ' + [string]$block_count + '/' + [string]$block_total}
-    if($debugging -eq 1){'Block decoded:   ' + $blocks_decoded}
-    
     return $blocks_decoded
     <# UTF-8 decode end #>
 }
@@ -141,7 +136,7 @@ for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
 
 for($i = 0; $i -lt $data.Length / 4; $i++) {
-    $blocks_decoded_array += saltshaker $data.Substring($i * 4,4) $i (($data.Length / 4) - 1) 0
+    $blocks_decoded_array += saltshaker $data.Substring($i * 4,4) 0
 }
 
 for($i = 0; $i -lt $blocks_decoded_array.Count; $i++) {
