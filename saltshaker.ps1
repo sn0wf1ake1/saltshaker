@@ -121,7 +121,7 @@ function saltshaker() {
         $blocks_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
     }
 
-    if($debugging -eq 1){'Block count:     ' + [string]$block_count + '/' + [string]$block_total + "`n"}
+    if($debugging -eq 1){'Block count:     ' + [string]$block_count + '/' + [string]$block_total}
     if($debugging -eq 1){'Block decoded:   ' + $blocks_decoded}
     
     return $blocks_decoded
