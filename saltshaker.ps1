@@ -19,8 +19,6 @@ $password_salted_temp = $x.Replace(',','').Replace('.','')
 for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length % 3) - 1; $i += 3) {
     $password_salted += [System.Convert]::ToString($password_salted_temp.Substring($i,3) % 255,2).PadLeft(8,'0')
 }
-
-'Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...' # Salt is way too long to display
 <# Password end #>
 
 function saltshaker() {
@@ -30,6 +28,8 @@ function saltshaker() {
         [Parameter(Mandatory = $true)] [int]$block_total,
         [Parameter(Mandatory = $true)] [byte]$debugging
     )
+
+    if($debugging -eq 1){'Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...'} # Salt is way too long to display
 
     <# UTF-8 encode into 16 byte blocks start #>
     [string]$blocks_encoded = ''
