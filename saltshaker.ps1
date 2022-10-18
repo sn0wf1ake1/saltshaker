@@ -5,7 +5,6 @@ $password = "Password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
 $password_salted = @()
 $password_salted_temp = ''
-$debug = 0
 
 $x = ([long][char]$password.Substring(0,1) / [math]::E).ToString().Substring(3)
 $y = ''
@@ -21,16 +20,17 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
     $password_salted += [System.Convert]::ToString($password_salted_temp.Substring($i,3) % 255,2).PadLeft(8,'0')
 }
 
-if($debug -eq 1){'Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...'} # Salt is way too long to display
+'Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...' # Salt is way too long to display
 <# Password end #>
 
 function saltshaker() {
      param (
         [Parameter(Mandatory = $true)] [string]$block,
         [Parameter(Mandatory = $true)] [int]$block_count,
-        [Parameter(Mandatory = $true)] [int]$block_total
+        [Parameter(Mandatory = $true)] [int]$block_total,
+        [Parameter(Mandatory = $true)] [byte]$debugging
     )
- 
+
     <# UTF-8 encode into 16 byte blocks start #>
     [string]$blocks_encoded = ''
 
@@ -45,7 +45,7 @@ function saltshaker() {
         $blocks_encoded += $utf
     }
 
-    'UTF-8 encoded:   ' + $blocks_encoded
+    if($debugging -eq 1){'UTF-8 encoded:   ' + $blocks_encoded}
     <# UTF-8 encode into 16 byte blocks end #>
 
     <# Encrypt start #>
@@ -55,13 +55,13 @@ function saltshaker() {
         $utf_binary += [System.Convert]::ToString($block,2).PadLeft(8,'0')
     }
 
-    'UTF-8 binary:    ' + $utf_binary -join ' '
+    if($debugging -eq 1){'UTF-8 binary:    ' + $utf_binary -join ' '}
 
     $utf_binary_string = $utf_binary -join ''
     $password_salted_string = $password_salted -join ''
     $password_rotations = [int](($password_salted.Count - ($password_salted.Count % 16)) / 128) # Do not try to understand this line of code
 
-    'Rotations:       ' + $password_rotations
+    if($debugging -eq 1){'Rotations:       ' + $password_rotations}
 
     for($i = 0; $i -lt $password_rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
@@ -77,7 +77,7 @@ function saltshaker() {
         $block_encrypted += $utf_binary_string.Substring($i,8)
     }
 
-    'Encrypted:       ' + $block_encrypted -join ' '
+    if($debugging -eq 1){'Encrypted:       ' + $block_encrypted -join ' '}
 
     for($i = 0; $i -lt 16; $i++) {
         $j = [Convert]::ToInt32($block_encrypted[$i],2)
@@ -99,13 +99,13 @@ function saltshaker() {
     $blocks_encoded = ''
     $block_decrypted = $utf_binary_string.Substring($utf_binary_string.Length - 128,128) -split '(\w{8})' | Where-Object {$_}
 
-    'Decrypted:       ' + $block_decrypted -join ' '
+    if($debugging -eq 1){'Decrypted:       ' + $block_decrypted -join ' '}
 
     for($i = 0; $i -lt 16; $i++) {
         $blocks_encoded +=  [char][convert]::ToInt32($block_decrypted[$i],2)
     }
 
-    'UTF-8 decoded:   ' + $blocks_encoded
+    if($debugging -eq 1){'UTF-8 decoded:   ' + $blocks_encoded}
     <# Decrypt end #>
 
     <# UTF-8 decode start #>
@@ -138,6 +138,6 @@ $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # 
 
 for($i = 0; $i -lt $data.Length / 4; $i++) {
     'Block text:      ' + $data.Substring($i * 4,4)
-    saltshaker $data.Substring($i * 4,4) $i (($data.Length / 4) - 1)
+    saltshaker $data.Substring($i * 4,4) $i (($data.Length / 4) - 1) 0
 }
 <# String divided into 4 character blocks to be encrypted start #>
