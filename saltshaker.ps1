@@ -24,7 +24,7 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
 function saltshaker() {
      param (
         [Parameter(Mandatory = $true)] [string]$block,
-        [Parameter(Mandatory = $true)] [int]$debugging
+        [Parameter(Mandatory = $true)] [byte]$debugging
     )
 
     if($debugging -eq 1){Write-Host ('Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...')} # Salt is way too long to display
