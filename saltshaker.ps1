@@ -24,10 +24,10 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
 function saltshaker() {
      param (
         [Parameter(Mandatory = $true)] [string]$block,
-        [Parameter(Mandatory = $true)] [byte]$debugging
+        [Parameter(Mandatory = $true)] [int]$debugging
     )
 
-    if($debugging -eq 1){'Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...'} # Salt is way too long to display
+    if($debugging -eq 1){Write-Host ('Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...')} # Salt is way too long to display
 
     <# UTF-8 encode into 16 byte blocks start #>
     [string]$blocks_encoded = ''
@@ -43,7 +43,7 @@ function saltshaker() {
         $blocks_encoded += $utf
     }
 
-    if($debugging -eq 1){'UTF-8 encoded:   ' + $blocks_encoded}
+    if($debugging -eq 1){Write-Host ('UTF-8 encoded:   ' + $blocks_encoded)}
     <# UTF-8 encode into 16 byte blocks end #>
 
     <# Encrypt start #>
@@ -53,13 +53,13 @@ function saltshaker() {
         $utf_binary += [System.Convert]::ToString($block,2).PadLeft(8,'0')
     }
 
-    if($debugging -eq 1){'UTF-8 binary:    ' + $utf_binary -join ' '}
+    if($debugging -eq 1){Write-Host ('UTF-8 binary:    ' + $utf_binary -join ' ')}
 
     $utf_binary_string = $utf_binary -join ''
     $password_salted_string = $password_salted -join ''
     $password_rotations = [int](($password_salted.Count - ($password_salted.Count % 16)) / 128) # Do not try to understand this line of code
 
-    if($debugging -eq 1){'Rotations:       ' + $password_rotations}
+    if($debugging -eq 1){Write-Host ('Rotations:       ' + $password_rotations)}
 
     for($i = 0; $i -lt $password_rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
@@ -75,7 +75,7 @@ function saltshaker() {
         $block_encrypted += $utf_binary_string.Substring($i,8)
     }
 
-    if($debugging -eq 1){'Encrypted:       ' + $block_encrypted -join ' '}
+    if($debugging -eq 1){Write-Host ('Encrypted:       ' + $block_encrypted -join ' ')}
 
     for($i = 0; $i -lt 16; $i++) {
         $j = [Convert]::ToInt32($block_encrypted[$i],2)
@@ -84,7 +84,7 @@ function saltshaker() {
         }
     }
 
-    if($debugging -eq 1){'Encrypted text:  ' + $block_encrypted_text}
+    if($debugging -eq 1){Write-Host ('Encrypted text:  ' + $block_encrypted_text)}
     <# Encrypt end #>
 
     <# Decrypt start #>
@@ -97,13 +97,13 @@ function saltshaker() {
     $blocks_encoded = ''
     $block_decrypted = $utf_binary_string.Substring($utf_binary_string.Length - 128,128) -split '(\w{8})' | Where-Object {$_}
 
-    if($debugging -eq 1){'Decrypted:       ' + $block_decrypted -join ' '}
+    if($debugging -eq 1){Write-Host ('Decrypted:       ' + $block_decrypted -join ' ')}
 
     for($i = 0; $i -lt 16; $i++) {
         $blocks_encoded +=  [char][convert]::ToInt32($block_decrypted[$i],2)
     }
 
-    if($debugging -eq 1){'UTF-8 decoded:   ' + $blocks_encoded}
+    if($debugging -eq 1){Write-Host ('UTF-8 decoded:   ' + $blocks_encoded)}
     <# Decrypt end #>
 
     <# UTF-8 decode start #>
@@ -137,7 +137,7 @@ for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
 
 for($i = 0; $i -lt $data.Length / 4; $i++) {
-    $blocks_decoded_array += saltshaker $data.Substring($i * 4,4) 0
+    $blocks_decoded_array += saltshaker $data.Substring($i * 4,4) 1
 }
 
 for($i = 0; $i -lt $blocks_decoded_array.Count; $i += 2) {
@@ -145,8 +145,6 @@ for($i = 0; $i -lt $blocks_decoded_array.Count; $i += 2) {
     $blocks_decoded_string += $blocks_decoded_array[$i]
 }
 
-'Encrypted: '
-$blocks_encrypted_string
-'Decrypted: '
-$blocks_decoded_string.Substring(1, $blocks_decoded_string.Length - ([int]$blocks_decoded_string.Substring(0,1) + 1))
+Write-Host ('Encrypted: ' + $blocks_encrypted_string)
+Write-Host ('Decrypted: ' + $blocks_decoded_string.Substring(1, $blocks_decoded_string.Length - ([int]$blocks_decoded_string.Substring(0,1) + 1)))
 <# String divided into 4 character blocks to be encrypted end #>
