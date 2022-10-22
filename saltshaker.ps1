@@ -57,11 +57,8 @@ function saltshaker() {
 
     $utf_binary_string = $utf_binary -join ''
     $password_salted_string = $password_salted -join ''
-    $password_rotations = [int](($password_salted.Count - ($password_salted.Count % 16)) / 128) # Do not try to understand this line of code
 
-    if($debugging -eq 1){Write-Host ('Rotations:       ' + $password_rotations)}
-
-    for($i = 0; $i -lt $password_rotations; $i++) {
+    for($i = 0; $i -lt 3; $i++) {
         for($j = 0; $j -lt 128; $j++) {
             $utf_binary_string += $utf_binary_string.Substring($i * 128,128).Substring($j,1) -bxor $password_salted_string.Substring($i * 128,128).Substring($j,1)
         }
@@ -88,7 +85,7 @@ function saltshaker() {
     <# Encrypt end #>
 
     <# Decrypt start #>
-    for($i = 0; $i -lt $password_rotations; $i++) {
+    for($i = 0; $i -lt 3; $i++) {
         for($j = 0; $j -lt 128; $j++) {
             $utf_binary_string += $utf_binary_string.Substring($i * 128,128).Substring($j,1) -bxor $password_salted_string.Substring($i * 128,128).Substring($j,1)
         }
