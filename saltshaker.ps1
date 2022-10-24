@@ -143,6 +143,6 @@ for($i = 0; $i -lt $blocks_decoded_array.Count; $i += 2) {
     $blocks_decoded_string += $blocks_decoded_array[$i]
 }
 
-Write-Host ('Encrypted:       ' + $blocks_encrypted_string)
+Write-Host ('Encrypted raw:   ' + $blocks_encrypted_string)
 Write-Host ('Decrypted:       ' + $blocks_decoded_string.Substring(1, $blocks_decoded_string.Length - ([int]$blocks_decoded_string.Substring(0,1) + 1)))
 <# String divided into 4 character blocks to be encrypted end #>
