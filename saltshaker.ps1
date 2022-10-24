@@ -3,7 +3,7 @@ Clear-Host
 <# Password start #>
 $password = "Password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
-$password_salted = @()
+$password_salted = ''
 $password_salted_temp = ''
 
 $x = ([long][char]$password.Substring(0,1) / [math]::E).ToString().Substring(3)
@@ -28,7 +28,7 @@ function saltshaker() {
         [Parameter(Mandatory = $true)] [byte]$debugging
     )
 
-    if($debugging -eq 1){Write-Host ('Password salted: ' + ($password_salted -join ' ').Substring(0,135) + '...')} # Salt is way too long to display
+    if($debugging -eq 1){Write-Host ('Password salted: ' + ($password_salted).Substring(0,128) + '...')} # Salt is way too long to display
 
     <# UTF-8 encode into 16 byte blocks start #>
     [string]$blocks_encoded = ''
@@ -48,7 +48,7 @@ function saltshaker() {
     <# UTF-8 encode into 16 byte blocks end #>
 
     <# Encrypt start #>
-    $utf_binary = @()
+    $utf_binary = ''
 
     foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
         $utf_binary += [System.Convert]::ToString($block,2).PadLeft(8,'0')
@@ -56,49 +56,27 @@ function saltshaker() {
 
     if($debugging -eq 1){Write-Host ('UTF-8 binary:    ' + $utf_binary -join ' ')}
 
-    $utf_binary_string = $utf_binary -join ''
-    $password_salted_string = $password_salted -join ''
-
     for($i = 0; $i -lt $rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
-            $utf_binary_string += $utf_binary_string.Substring($i * 128,128).Substring($j,1) -bxor $password_salted_string.Substring($i * 128,128).Substring($j,1)
+            $utf_binary += $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
         }
     }
 
-    $block_encrypted = @()
-    $block_encrypted_text = ''
-    $utf_binary_string = $utf_binary_string.Substring($utf_binary_string.Length - 128,128)
-
-    for($i = 0; $i -lt 128; $i += 8) {
-        $block_encrypted += $utf_binary_string.Substring($i,8)
-    }
-
-    if($debugging -eq 1){Write-Host ('Encrypted:       ' + $block_encrypted -join ' ')}
-
-    for($i = 0; $i -lt 16; $i++) {
-        $j = [Convert]::ToInt32($block_encrypted[$i],2)
-        if($j -ne 158) { # x9E cannot be converted for some reason
-            $block_encrypted_text += [char]$j
-        }
-    }
-
-    if($debugging -eq 1){Write-Host ('Encrypted text:  ' + $block_encrypted_text)}
+    $utf_binary = $utf_binary.Substring($utf_binary.Length - 128,128)
     <# Encrypt end #>
 
     <# Decrypt start #>
     for($i = 0; $i -lt $rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
-            $utf_binary_string += $utf_binary_string.Substring($i * 128,128).Substring($j,1) -bxor $password_salted_string.Substring($i * 128,128).Substring($j,1)
+            $utf_binary += $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
         }
     }
 
+    $utf_binary = $utf_binary.Substring($utf_binary.Length - 128,128)
     $blocks_encoded = ''
-    $block_decrypted = $utf_binary_string.Substring($utf_binary_string.Length - 128,128) -split '(\w{8})' | Where-Object {$_}
-
-    if($debugging -eq 1){Write-Host ('Decrypted:       ' + $block_decrypted -join ' ')}
 
     for($i = 0; $i -lt 16; $i++) {
-        $blocks_encoded +=  [char][convert]::ToInt32($block_decrypted[$i],2)
+        $blocks_encoded += [char][convert]::ToInt32($utf_binary.Substring($i * 8,8),2)
     }
 
     if($debugging -eq 1){Write-Host ('UTF-8 decoded:   ' + $blocks_encoded)}
@@ -117,7 +95,7 @@ function saltshaker() {
         $blocks_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
     }
 
-    return @($blocks_decoded,$block_encrypted_text)
+    return @($blocks_decoded,$utf_binary)
     <# UTF-8 decode end #>
 }
 
@@ -143,6 +121,6 @@ for($i = 0; $i -lt $blocks_decoded_array.Count; $i += 2) {
     $blocks_decoded_string += $blocks_decoded_array[$i]
 }
 
-Write-Host ('Encrypted raw:   ' + $blocks_encrypted_string)
+#Write-Host ('Encrypted raw:   ' + $blocks_encrypted_string)
 Write-Host ('Decrypted:       ' + $blocks_decoded_string.Substring(1, $blocks_decoded_string.Length - ([int]$blocks_decoded_string.Substring(0,1) + 1)))
 <# String divided into 4 character blocks to be encrypted end #>
