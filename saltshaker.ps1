@@ -95,7 +95,7 @@ function saltshaker() {
         $blocks_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
     }
 
-    return @($blocks_decoded)
+    return $blocks_decoded
     <# UTF-8 decode end #>
 }
 
@@ -104,7 +104,6 @@ $data = "aaaaaaaaaaaaaaaaaæøå雨wxzQ"
 $data_padding = ''
 $blocks_decoded_array = @()
 $blocks_decoded_string = ''
-$blocks_encrypted_string = ''
 
 for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
     $data_padding += [char](Get-Random -Minimum 32 -Maximum 126)
