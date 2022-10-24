@@ -24,6 +24,7 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
 function saltshaker() {
      param (
         [Parameter(Mandatory = $true)] [string]$block,
+        [Parameter(Mandatory = $true)] [int]$rotations,
         [Parameter(Mandatory = $true)] [byte]$debugging
     )
 
@@ -58,7 +59,7 @@ function saltshaker() {
     $utf_binary_string = $utf_binary -join ''
     $password_salted_string = $password_salted -join ''
 
-    for($i = 0; $i -lt 3; $i++) {
+    for($i = 0; $i -lt $rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
             $utf_binary_string += $utf_binary_string.Substring($i * 128,128).Substring($j,1) -bxor $password_salted_string.Substring($i * 128,128).Substring($j,1)
         }
@@ -85,7 +86,7 @@ function saltshaker() {
     <# Encrypt end #>
 
     <# Decrypt start #>
-    for($i = 0; $i -lt 3; $i++) {
+    for($i = 0; $i -lt $rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
             $utf_binary_string += $utf_binary_string.Substring($i * 128,128).Substring($j,1) -bxor $password_salted_string.Substring($i * 128,128).Substring($j,1)
         }
@@ -134,7 +135,7 @@ for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
 
 for($i = 0; $i -lt $data.Length / 4; $i++) {
-    $blocks_decoded_array += saltshaker $data.Substring($i * 4,4) 1
+    $blocks_decoded_array += saltshaker $data.Substring($i * 4,4) ($i % 4) 1
 }
 
 for($i = 0; $i -lt $blocks_decoded_array.Count; $i += 2) {
