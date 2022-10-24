@@ -95,7 +95,7 @@ function saltshaker() {
         $blocks_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
     }
 
-    return @($blocks_decoded,$utf_binary)
+    return @($blocks_decoded)
     <# UTF-8 decode end #>
 }
 
@@ -116,11 +116,9 @@ for($i = 0; $i -lt $data.Length / 4; $i++) {
     $blocks_decoded_array += saltshaker $data.Substring($i * 4,4) (($i % 4) + 1) 1
 }
 
-for($i = 0; $i -lt $blocks_decoded_array.Count; $i += 2) {
-    $blocks_encrypted_string += $blocks_decoded_array[$i + 1] + '   '
+for($i = 0; $i -lt $blocks_decoded_array.Count; $i++) {
     $blocks_decoded_string += $blocks_decoded_array[$i]
 }
 
-#Write-Host ('Encrypted raw:   ' + $blocks_encrypted_string)
 Write-Host ('Decrypted:       ' + $blocks_decoded_string.Substring(1, $blocks_decoded_string.Length - ([int]$blocks_decoded_string.Substring(0,1) + 1)))
 <# String divided into 4 character blocks to be encrypted end #>
