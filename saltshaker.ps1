@@ -21,22 +21,6 @@ for($i = 0; $i -le $password_salted_temp.Length - ($password_salted_temp.Length 
 }
 <# Password end #>
 
-function mixer() {
-    param (
-        [Parameter(Mandatory = $true)] [int]$rotations,
-        [Parameter(Mandatory = $true)] [string]$utf_binary,
-        [Parameter(Mandatory = $true)] [string]$password_salted
-    )
-
-    for($i = 0; $i -lt $rotations; $i++) {
-        for($j = 0; $j -lt 128; $j++) {
-            $utf_binary += $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
-        }
-    }
-
-    return $utf_binary.Substring($utf_binary.Length - 128,128)
-}
-
 function saltshaker() {
      param (
         [Parameter(Mandatory = $true)] [string]$block,
@@ -72,11 +56,23 @@ function saltshaker() {
 
     if($debugging -eq 1){Write-Host ('UTF-8 binary:    ' + $utf_binary -join ' ')}
 
-    $utf_binary = mixer $rotations $utf_binary $password_salted
+    for($i = 0; $i -lt $rotations; $i++) {
+        for($j = 0; $j -lt 128; $j++) {
+            $utf_binary += $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
+        }
+    }
+
+    $utf_binary = $utf_binary.Substring($utf_binary.Length - 128,128)
     <# Encrypt end #>
 
     <# Decrypt start #>
-    $utf_binary = mixer $rotations $utf_binary $password_salted
+    for($i = 0; $i -lt $rotations; $i++) {
+        for($j = 0; $j -lt 128; $j++) {
+            $utf_binary += $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
+        }
+    }
+
+    $utf_binary = $utf_binary.Substring($utf_binary.Length - 128,128)
     $blocks_encoded = ''
 
     for($i = 0; $i -lt 16; $i++) {
