@@ -65,7 +65,7 @@ function saltshaker() {
 
     for($i = 0; $i -lt 128; $i += 8) {
         $j = [System.Convert]::ToInt32($utf_binary.Substring($i,8),2)
-        if($j -ge 32 -and $j -lt 127) {# Strip non-visible characters
+        if($j -ge 32 -and $j -lt 127) { # Strip non-visible characters
             $utf_binary_string += [char]$j
         }
     }
