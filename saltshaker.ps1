@@ -111,7 +111,7 @@ $data_padding = $block_decoded = $block_decoded_temp = ''
 $block_previous = $password_salted.Substring($password_salted.Length - 128,128) # CBC initialization vector
 
 for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
-    $data_padding += [char](Get-Random -Minimum 32 -Maximum 127)
+    $data_padding += [char](Get-Random -Minimum 0 -Maximum 255)
 }
 
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
