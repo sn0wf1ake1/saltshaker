@@ -3,8 +3,7 @@ Clear-Host
 <# Password start #>
 $password = "Password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
-$password_salted = ''
-$password_salted_temp = ''
+$password_salted = $password_salted_temp = ''
 
 $x = ([long][char]$password.Substring(0,1) / [math]::E).ToString().Substring(3)
 $y = ''
@@ -48,8 +47,7 @@ function saltshaker() {
     <# UTF-8 encode into 16 byte blocks end #>
 
     <# Encrypt start #>
-    $utf_binary = ''
-    $utf_binary_string = ''
+    $utf_binary = $utf_binary_string = ''
 
     foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
         $utf_binary += [System.Convert]::ToString($block,2).PadLeft(8,'0')
@@ -65,7 +63,7 @@ function saltshaker() {
 
     for($i = 0; $i -lt 128; $i += 8) {
         $j = [System.Convert]::ToInt32($utf_binary.Substring($i,8),2)
-        if($j -ge 32 -and $j -lt 127) { # Strip non-visible characters
+        if($j -ge 32 -and $j -le 126) { # Strip non-visible characters for debug purposes
             $utf_binary_string += [char]$j
         }
     }
@@ -91,7 +89,7 @@ function saltshaker() {
     <# Decrypt end #>
 
     <# UTF-8 decode start #>
-    [string]$blocks_decoded = ''
+    [string]$block_decoded = ''
 
     for($j = 0; $j -le 12; $j += 4) {
         [string]$utf = ''
@@ -100,30 +98,29 @@ function saltshaker() {
             $utf += [char]($blocks_encoded.Substring($j,4).Substring($i,1))
         }
 
-        $blocks_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
+        $block_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
     }
 
-    return $blocks_decoded
+    return $utf_binary + $block_decoded
     <# UTF-8 decode end #>
 }
 
 <# String divided into 4 character blocks to be encrypted start #>
 $data = "aaaaaaaaaaaaaaaaannnnnæøå雨wxzQ"
-$data_padding = ''
-$blocks_decoded_array = @()
+$data_padding = $block_decoded = $block_decoded_temp = ''
+$block_previous = $password_salted.Substring($password_salted.Length - 128,128) # CBC initialization vector
 
 for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
-    $data_padding += [char](Get-Random -Minimum 32 -Maximum 126)
+    $data_padding += [char](Get-Random -Minimum 32 -Maximum 127)
 }
 
-Write-Host ('Password salted: ' + $password_salted.Substring(0,128) + '...')
-$block_previous = $password_salted.Substring(0,128)
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
 
 for($i = 0; $i -lt $data.Length / 4; $i++) {
-    $blocks_decoded_array += saltshaker $block_previous $data.Substring($i * 4,4) ($i / 4 % 9)
+    $block_decoded_temp = saltshaker $block_previous $data.Substring($i * 4,4) ($i / 4 % 9)
+    $block_previous = $block_decoded_temp.Substring(0,127)
+    $block_decoded += $block_decoded_temp.Substring(128,4)
 }
 
-$blocks_decoded = $blocks_decoded_array -join ''
-Write-Host ('Decrypted:        ' + $blocks_decoded.Substring(1, $blocks_decoded.Length - ([int]$blocks_decoded.Substring(0,1) + 1)))
+Write-Host ('Decrypted:        ' + $block_decoded.Substring(1, $block_decoded.Length - ([int]$block_decoded.Substring(0,1) + 1)))
 <# String divided into 4 character blocks to be encrypted end #>
