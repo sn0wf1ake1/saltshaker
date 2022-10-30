@@ -101,8 +101,6 @@ function saltshaker() {
 <# String divided into 4 character blocks to be encrypted start #>
 $data = "aaaaaaaaaaaaaaaaannnnnæøå雨wxzQ"
 $data_padding = ''
-$blocks_decoded_array = @()
-$blocks_decoded_string = ''
 
 for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
     $data_padding += [char](Get-Random -Minimum 32 -Maximum 126)
@@ -113,12 +111,8 @@ $block_previous = $password_salted.Substring(0,128)
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
 
 for($i = 0; $i -lt $data.Length / 4; $i++) {
-    $blocks_decoded_array += saltshaker $block_previous $data.Substring($i * 4,4) ($i / 4 % 9)
+    $blocks_decoded += saltshaker $block_previous $data.Substring($i * 4,4) ($i / 4 % 9)
 }
 
-for($i = 0; $i -lt $blocks_decoded_array.Count; $i++) {
-    $blocks_decoded_string += $blocks_decoded_array[$i]
-}
-
-Write-Host ('Decrypted:       ' + $blocks_decoded_string.Substring(1, $blocks_decoded_string.Length - ([int]$blocks_decoded_string.Substring(0,1) + 1)))
+Write-Host ('Decrypted:       ' + $blocks_decoded.Substring(1, $blocks_decoded.Length - ([int]$blocks_decoded.Substring(0,1) + 1)))
 <# String divided into 4 character blocks to be encrypted end #>
