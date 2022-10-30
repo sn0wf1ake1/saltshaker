@@ -28,7 +28,7 @@ function saltshaker() {
         [Parameter(Mandatory = $true)] [int]$rotations
     )
 
-    #Write-Host ('Password salted: ' + ($password_salted).Substring(0,128) + '...') # Salt is way too long to display
+    #Write-Host ('Password salted:  ' + ($password_salted).Substring(0,128) + '...') # Salt is way too long to display
 
     <# UTF-8 encode into 16 byte blocks start #>
     [string]$blocks_encoded = ''
@@ -44,11 +44,12 @@ function saltshaker() {
         $blocks_encoded += $utf
     }
 
-    #Write-Host ('UTF-8 encoded:   ' + $blocks_encoded)
+    #Write-Host ('UTF-8 encoded:    ' + $blocks_encoded)
     <# UTF-8 encode into 16 byte blocks end #>
 
     <# Encrypt start #>
     $utf_binary = ''
+    $utf_binary_string = ''
 
     foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
         $utf_binary += [System.Convert]::ToString($block,2).PadLeft(8,'0')
@@ -61,7 +62,15 @@ function saltshaker() {
     }
 
     $utf_binary = $utf_binary.Substring($utf_binary.Length - 128,128)
-    Write-Host ('UTF-8 binary:    ' + $utf_binary)
+
+    for($i = 0; $i -lt 128; $i += 8) {
+        $j = [System.Convert]::ToInt32($utf_binary.Substring($i,8),2)
+        if($j -ge 32 -and $j -lt 127 ) {# Visually strip non-visible characters
+            $utf_binary_string += [char]$j
+        }
+    }
+
+    Write-Host ('UTF-8 binary:     ' + $utf_binary + "`n" + 'Encrypted string: ' + $utf_binary_string)
     <# Encrypt end #>
 
     <# Decrypt start #>
@@ -107,7 +116,7 @@ for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
     $data_padding += [char](Get-Random -Minimum 32 -Maximum 126)
 }
 
-Write-Host ('Password salted: ' + $password_salted.Substring(0,128))
+Write-Host ('Password salted: ' + $password_salted.Substring(0,128) + '...')
 $block_previous = $password_salted.Substring(0,128)
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
 
@@ -116,5 +125,5 @@ for($i = 0; $i -lt $data.Length / 4; $i++) {
 }
 
 $blocks_decoded = $blocks_decoded_array -join ''
-Write-Host ('Decrypted:       ' + $blocks_decoded.Substring(1, $blocks_decoded.Length - ([int]$blocks_decoded.Substring(0,1) + 1)))
+Write-Host ('Decrypted:        ' + $blocks_decoded.Substring(1, $blocks_decoded.Length - ([int]$blocks_decoded.Substring(0,1) + 1)))
 <# String divided into 4 character blocks to be encrypted end #>
