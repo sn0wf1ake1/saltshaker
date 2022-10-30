@@ -117,7 +117,7 @@ for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
 
 for($i = 0; $i -lt $data.Length / 4; $i++) {
-    $block_decoded_temp = saltshaker $block_previous $data.Substring($i * 4,4) $i
+    $block_decoded_temp = saltshaker $block_previous $data.Substring($i * 4,4) ($i % 9)
     $block_previous = $block_decoded_temp.Substring(0,127)
     $block_decoded += $block_decoded_temp.Substring(128,4)
 }
