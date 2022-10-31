@@ -111,8 +111,7 @@ function saltshaker() {
 
 <# String divided into 4 character blocks to be encrypted start #>
 $data = "aaaaaaaaaaaaaaannnnnæøå雨wxzQ"
-$data_crc = 0
-$data_padding = $block_decoded = $block_decoded_temp = ''
+$data_padding = $block_decoded = $block_decoded_temp = $data_crc = ''
 $block_previous = $password_salted.Substring($password_salted.Length - 128,128) # CBC initialization vector
 
 <# CRC padding start #>
