@@ -5,12 +5,12 @@ $password = "Password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
 $password_salted = $password_salted_temp = $null
 
-$x = ([long][char]$password.Substring(0,1) / [math]::E).ToString().Substring(3)
+$x = ($password[0] / [math]::E).ToString().Substring(3)
 $y = $null
 
 for($i = 0; $i -lt $password.Length; $i++) {
-    $x += ([long][char]$password.Substring($i,1) / [math]::E).ToString() + $y
-    $y += ($x.Substring($x.Length - 6,6) / [math]::E).ToString()
+    $x += ($password[$i] / [math]::E).ToString() + $y
+    $y += ($x[-6] / [math]::E).ToString()
 }
 
 $password_salted_temp = $x -replace "[^0-9]"
