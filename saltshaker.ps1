@@ -3,7 +3,7 @@ Clear-Host
 <# Password start #>
 $password = "Password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
-$password_salted = $password_salted_temp = ''
+$password_salted = $password_salted_temp = $null
 
 $x = ([long][char]$password.Substring(0,1) / [math]::E).ToString().Substring(3)
 $y = ''
@@ -30,7 +30,7 @@ function saltshaker() {
     #Write-Host ('Password salted:  ' + ($password_salted).Substring(0,128) + '...') # Salt is way too long to display
 
     <# UTF-8 encode into 16 byte blocks start #>
-    [string]$blocks_encoded = ''
+    [string]$blocks_encoded = $null
 
     for($j = 0; $j -lt 4; $j++) {
         $base64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($([string]$block.Substring($j,1))))
@@ -47,7 +47,7 @@ function saltshaker() {
     <# UTF-8 encode into 16 byte blocks end #>
 
     <# Encrypt start #>
-    $utf_binary = $utf_binary_string = ''
+    $utf_binary = $utf_binary_string = $null
 
     foreach($block in [System.Text.Encoding]::Default.GetBytes($blocks_encoded)) {
         $utf_binary += [System.Convert]::ToString($block,2).PadLeft(8,'0')
@@ -83,7 +83,7 @@ function saltshaker() {
     }
 
     $utf_binary = $utf_binary.Substring($utf_binary.Length - 128,128)
-    $blocks_encoded = ''
+    $blocks_encoded = $null
 
     for($i = 0; $i -lt 16; $i++) {
         $blocks_encoded += [char][convert]::ToInt32($utf_binary.Substring($i * 8,8),2)
@@ -93,10 +93,10 @@ function saltshaker() {
     <# Decrypt end #>
 
     <# UTF-8 decode start #>
-    [string]$block_decoded = ''
+    [string]$block_decoded = $null
 
     for($j = 0; $j -le 12; $j += 4) {
-        [string]$utf = ''
+        [string]$utf = $null
 
         for($i = 0; $i -le 3; $i++) {
             $utf += [char]($blocks_encoded.Substring($j,4).Substring($i,1))
@@ -111,7 +111,7 @@ function saltshaker() {
 
 <# String divided into 4 character blocks to be encrypted start #>
 $data = "aaaaaaaaaaaaaaannnnnæøå雨wxzQ"
-$data_padding = $block_decoded = $block_decoded_temp = $data_crc = ''
+$data_padding = $block_decoded = $block_decoded_temp = $data_crc = $null
 $block_previous = $password_salted.Substring($password_salted.Length - 128,128) # CBC initialization vector
 
 <# CRC padding start #>
