@@ -55,7 +55,9 @@ function saltshaker() {
 
     for($i = 0; $i -lt $rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
-            $utf_binary += [byte]('0' + $block_previous[$j]) -bxor [byte]$utf_binary.Substring($i * 128,128).Substring($j,1) -bxor [byte]$password_salted.Substring($i * 128,128).Substring($j,1)
+            $utf_binary +=  [byte]('0' + $block_previous[$j]) -bxor
+                            [byte]$utf_binary.Substring($i * 128,128).Substring($j,1) -bxor
+                            [byte]$password_salted.Substring($i * 128,128).Substring($j,1)
         }
     }
 
@@ -74,7 +76,9 @@ function saltshaker() {
     <# Decrypt start #>
     for($i = 0; $i -lt $rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
-            $utf_binary += [byte]('0' + $block_previous[$j]) -bxor [byte]$utf_binary.Substring($i * 128,128).Substring($j,1) -bxor [byte]$password_salted.Substring($i * 128,128).Substring($j,1)
+            $utf_binary +=  [byte]('0' + $block_previous[$j]) -bxor
+                            [byte]$utf_binary.Substring($i * 128,128).Substring($j,1) -bxor
+                            [byte]$password_salted.Substring($i * 128,128).Substring($j,1)
         }
     }
 
