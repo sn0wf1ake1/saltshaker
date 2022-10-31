@@ -3,12 +3,14 @@ Clear-Host
 <# Password start #>
 $password = "Password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
-$password_salted = $null
+$password_salted = $password_salted_temp = $null
 
-$password_salted_temp = ($password[0] / [math]::E).ToString().Substring(3)
+$x = ($password[0] / [math]::E).ToString().Substring(3)
+$y = $null
 
 for($i = 0; $i -lt $password.Length; $i++) {
-    $password_salted_temp += ($password[$i] / [math]::E).ToString() + ($x[-6] / [math]::E).ToString()
+    $x += ($password[$i] / [math]::E).ToString() + ($x[-6] / [math]::E).ToString() + $y
+    $y += ($x[-6] / [math]::E).ToString()
 }
 
 $password_salted_temp = $x -replace "[^0-9]"
