@@ -3,14 +3,12 @@ Clear-Host
 <# Password start #>
 $password = "Password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
-$password_salted = $password_salted_temp = $null
+$password_salted = $null
 
-$x = ($password[0] / [math]::E).ToString().Substring(3)
-$y = $null
+$password_salted_temp = ($password[0] / [math]::E).ToString().Substring(3)
 
 for($i = 0; $i -lt $password.Length; $i++) {
-    $x += ($password[$i] / [math]::E).ToString() + $y
-    $y += ($x[-6] / [math]::E).ToString()
+    $password_salted_temp += ($password[$i] / [math]::E).ToString() + ($x[-6] / [math]::E).ToString()
 }
 
 $password_salted_temp = $x -replace "[^0-9]"
@@ -62,7 +60,7 @@ function saltshaker() {
     }
 
     $utf_binary = $utf_binary.Substring($utf_binary.Length - 128,128)
-    
+        
     for($i = 0; $i -lt 128; $i += 8) {
         $j = [System.Convert]::ToInt32($utf_binary.Substring($i,8),2)
         if($j -ge 32 -and $j -le 126) { # Strip non-visible characters for debug purposes
