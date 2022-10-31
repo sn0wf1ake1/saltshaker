@@ -55,12 +55,12 @@ function saltshaker() {
 
     for($i = 0; $i -lt $rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
-            $utf_binary += [byte]('0' + $block_previous[$j]) -bxor $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
+            $utf_binary += [byte]('0' + $block_previous[$j]) -bxor [byte]$utf_binary.Substring($i * 128,128).Substring($j,1) -bxor [byte]$password_salted.Substring($i * 128,128).Substring($j,1)
         }
     }
 
     $utf_binary = $utf_binary.Substring($utf_binary.Length - 128,128)
-
+    
     for($i = 0; $i -lt 128; $i += 8) {
         $j = [System.Convert]::ToInt32($utf_binary.Substring($i,8),2)
         if($j -ge 32 -and $j -le 126) { # Strip non-visible characters for debug purposes
@@ -74,7 +74,7 @@ function saltshaker() {
     <# Decrypt start #>
     for($i = 0; $i -lt $rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
-            $utf_binary += [byte]('0' + $block_previous[$j]) -bxor $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
+            $utf_binary += [byte]('0' + $block_previous[$j]) -bxor [byte]$utf_binary.Substring($i * 128,128).Substring($j,1) -bxor [byte]$password_salted.Substring($i * 128,128).Substring($j,1)
         }
     }
 
