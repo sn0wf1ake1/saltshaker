@@ -116,7 +116,7 @@ $block_previous = $password_salted.Substring($password_salted.Length - 128,128) 
 
 <# CRC padding start #>
 for($i = 0; $i -lt $data.Length; $i++) {
-    $data_crc += [double][char]$data[$i] + $data_crc % [math]::E
+    $data_crc += [double]$data[$i] + $data_crc % [math]::E
 }
 
 $data_crc = [string]$data_crc -replace "[^0-9]"
