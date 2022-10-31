@@ -110,13 +110,22 @@ function saltshaker() {
 }
 
 <# String divided into 4 character blocks to be encrypted start #>
-$data = "aaaaaaaaaaaaaaaaannnnnæøå雨wxzQ"
+$data = "aaaaaaaaaaaaaaannnnnæøå雨wxzQ"
+$data_crc = 0
 $data_padding = $block_decoded = $block_decoded_temp = ''
 $block_previous = $password_salted.Substring($password_salted.Length - 128,128) # CBC initialization vector
 
-for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
-    $data_padding += [char](Get-Random -Minimum 0 -Maximum 255) # Future project; make this a checksum
+<# CRC padding start #>
+for($i = 0; $i -lt $data.Length; $i++) {
+    $data_crc += [double][char]$data[$i] + $data_crc % [math]::E
 }
+
+$data_crc = [string]$data_crc -replace "[^0-9]"
+
+for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
+    $data_padding += [char]([int]($data_crc.ToString().Substring($i,3)) % 255)
+}
+<# CRC padding end #>
 
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
 
