@@ -6,7 +6,7 @@ $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($p
 $password_salted = $password_salted_temp = $null
 
 $x = ([long][char]$password.Substring(0,1) / [math]::E).ToString().Substring(3)
-$y = ''
+$y = $null
 
 for($i = 0; $i -lt $password.Length; $i++) {
     $x += ([long][char]$password.Substring($i,1) / [math]::E).ToString() + $y
@@ -32,12 +32,12 @@ function saltshaker() {
     <# UTF-8 encode into 16 byte blocks start #>
     [string]$blocks_encoded = $null
 
-    for($j = 0; $j -lt 4; $j++) {
-        $base64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($([string]$block.Substring($j,1))))
-        [string]$utf = ''
+    for($i = 0; $i -lt 4; $i++) {
+        $base64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($([string]$block.Substring($i,1))))
+        [string]$utf = $null
 
-        for($i = 0; $i -lt 4; $i++) {
-            $utf += [char]($base64.Substring($i,1))
+        for($j = 0; $j -lt 4; $j++) {
+            $utf += [char]($base64.Substring($j,1))
         }
 
         $blocks_encoded += $utf
