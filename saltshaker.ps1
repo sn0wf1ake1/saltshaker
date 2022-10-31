@@ -33,11 +33,11 @@ function saltshaker() {
     [string]$blocks_encoded = $null
 
     for($i = 0; $i -lt 4; $i++) {
-        $base64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($([string]$block.Substring($i,1))))
+        $base64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($([string]$block[$i])))
         [string]$utf = $null
 
         for($j = 0; $j -lt 4; $j++) {
-            $utf += [char]($base64.Substring($j,1))
+            $utf += [char]($base64[$j])
         }
 
         $blocks_encoded += $utf
@@ -99,7 +99,7 @@ function saltshaker() {
         [string]$utf = $null
 
         for($i = 0; $i -le 3; $i++) {
-            $utf += [char]($blocks_encoded.Substring($j,4).Substring($i,1))
+            $utf += [char]($blocks_encoded.Substring($j,4)[$i])
         }
 
         $block_decoded += [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($utf))
