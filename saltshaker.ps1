@@ -55,7 +55,7 @@ function saltshaker() {
 
     for($i = 0; $i -lt $rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
-            $utf_binary += $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
+            $utf_binary += [byte]('0' + $block_previous[$j]) -bxor $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
         }
     }
 
@@ -74,7 +74,7 @@ function saltshaker() {
     <# Decrypt start #>
     for($i = 0; $i -lt $rotations; $i++) {
         for($j = 0; $j -lt 128; $j++) {
-            $utf_binary += $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
+            $utf_binary += [byte]('0' + $block_previous[$j]) -bxor $utf_binary.Substring($i * 128,128).Substring($j,1) -bxor $password_salted.Substring($i * 128,128).Substring($j,1)
         }
     }
 
@@ -111,7 +111,7 @@ $data_padding = $block_decoded = $block_decoded_temp = ''
 $block_previous = $password_salted.Substring($password_salted.Length - 128,128) # CBC initialization vector
 
 for($i = 0; $i -lt (4 - ($data.Length + 1) % 4) % 4; $i++) {
-    $data_padding += [char](Get-Random -Minimum 0 -Maximum 255)
+    $data_padding += [char](Get-Random -Minimum 0 -Maximum 255) # Future project; make this a checksum
 }
 
 $data = ((4 - ($data.Length + 1) % 4) % 4).ToString() + $data + $data_padding # First byte counts how many padded characters has been added to the final block
