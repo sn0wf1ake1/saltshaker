@@ -1,5 +1,7 @@
 Clear-Host
 
+# Slow as molasses and also found a major weakness in the password salt generator
+
 <# Password start #>
 $password = "Password"
 $password = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($($password)))
